@@ -124,7 +124,7 @@ class points2One( QDialog, Ui_Dialog ):
         provider = layer.dataProvider()
         provider.select(layer.pendingAllAttributesList(), QgsRectangle(), True, True)
         self.progressBar.setRange(0, provider.featureCount())
-        writer = QgsVectorFileWriter( self.shapefileName, self.encoding, provider.fields(), wkbType, provider.crs() )
+        writer = QgsVectorFileWriter( self.shapefileName, self.encoding, provider.fields(), wkbType, layer.srs() )
         outFeatures = iterFeatures(layer, attrName, wkbType, self.updateProgressBar)
         for outFeat in outFeatures:
             writer.addFeature(outFeat)
