@@ -89,18 +89,15 @@ class points2One( QDialog, Ui_Dialog ):
             QMessageBox.warning( self, "Points2One", self.tr( "Please specify output shapefile" ) )
         else:
             self.outShape.clear()
-            if self.attrName.isEnabled():
-                if self.rdoPolyline.isChecked():
-                    wkbType = QGis.WKBLineString
-                else:
-                    wkbType = QGis.WKBPolygon
-                self.points2oneMulti( self.inShape.currentText(), wkbType, unicode( self.attrName.currentText() ) )
+            if self.rdoPolyline.isChecked():
+                wkbType = QGis.WKBLineString
             else:
-                if self.rdoPolyline.isChecked():
-                    wkbType = QGis.WKBLineString
-                else:
-                    wkbType = QGis.WKBPolygon
-                self.points2one( self.inShape.currentText(), wkbType )
+                wkbType = QGis.WKBPolygon
+            if self.rdoKeyName.isChecked():
+                attrName = unicode(self.attrName.currentText())
+            else:
+                attrName = None
+            self.points2oneMulti( self.inShape.currentText(), wkbType, attrName)
             out_text = "\n"
             end_text = self.tr( "\nWould you like to add the new layer to the TOC?" )
             addToTOC = QMessageBox.question( self, "Points2One", self.tr( "Created output shapefile:" ) + "\n"
@@ -116,40 +113,7 @@ class points2One( QDialog, Ui_Dialog ):
             return
         self.outShape.setText( QString( self.shapefileName ) )
 
-    def points2one( self, myLayer, wkbType ):
-        check = QFile( self.shapefileName )
-        if check.exists():
-            if not QgsVectorFileWriter.deleteShapeFile( self.shapefileName ):
-                QMessageBox.warning( self, "Points2One", self.tr( "Unable to delete existing shapefile." ) )
-                return
-        layer = getVectorLayerByName( myLayer )
-        provider = layer.dataProvider()
-        provider.select(layer.pendingAllAttributesList(), QgsRectangle(), True, True)
-        self.progressBar.setRange(0, provider.featureCount())
-        in_feat = QgsFeature()
-        out_feat = QgsFeature()
-        inGeom = QgsGeometry()
-        outGeom = QgsGeometry()
-        pointList = []
-        n = 0
-        writer = QgsVectorFileWriter( self.shapefileName, self.encoding, provider.fields(), wkbType, provider.crs() )
-        while(provider.nextFeature(in_feat)):
-            inGeom = in_feat.geometry()
-            x = inGeom.asPoint().x()
-            y = inGeom.asPoint().y()
-            pointList.append(QgsPoint(x, y))
-            n += 1
-            self.progressBar.setValue(n)
-        atMap = in_feat.attributeMap()
-        out_feat.setAttributeMap(atMap)    
-        if  wkbType == QGis.WKBPolygon:
-            out_feat.setGeometry(outGeom.fromPolygon([pointList]))
-        else:
-            out_feat.setGeometry(QgsGeometry.fromPolyline(pointList))
-        writer.addFeature(out_feat)
-        del writer
-
-#developed by Goyo Diaz (goyodiaz@gmail.com)  
+    #developed by Goyo Diaz (goyodiaz@gmail.com)  
     def points2oneMulti( self, myLayer, wkbType, attrName ):
         check = QFile( self.shapefileName )
         if check.exists():
@@ -163,7 +127,7 @@ class points2One( QDialog, Ui_Dialog ):
         writer = QgsVectorFileWriter( self.shapefileName, self.encoding, provider.fields(), wkbType, provider.crs() )
         outFeatures = iterFeatures(layer, attrName, wkbType, self.updateProgressBar)
         for outFeat in outFeatures:
-            writer.addFeature(outFeat)  
+            writer.addFeature(outFeat)
         del writer
 
 
