@@ -97,7 +97,12 @@ class points2One( QDialog, Ui_Dialog ):
                 attrName = unicode(self.attrName.currentText())
             else:
                 attrName = None
-            self.points2oneMulti( self.inShape.currentText(), wkbType, attrName)
+            self.progressBar.setRange(0, provider.featureCount())
+            try:
+                points2one(layer, self.shapefileName, self.encoding, wkbType, attrName, self.updateProgressBar)
+            except FileDeletionError:
+                QMessageBox.warning(self, 'Points2One', self.tr('Unable to delete existing shapefile.'))
+                return
             out_text = "\n"
             end_text = self.tr( "\nWould you like to add the new layer to the TOC?" )
             addToTOC = QMessageBox.question( self, "Points2One", self.tr( "Created output shapefile:" ) + "\n"
@@ -113,25 +118,21 @@ class points2One( QDialog, Ui_Dialog ):
             return
         self.outShape.setText( QString( self.shapefileName ) )
 
-    #developed by Goyo Diaz (goyodiaz@gmail.com)  
-    def points2oneMulti( self, myLayer, wkbType, attrName ):
-        check = QFile( self.shapefileName )
-        if check.exists():
-            if not QgsVectorFileWriter.deleteShapeFile( self.shapefileName ):
-                QMessageBox.warning( self, "Points2One", self.tr( "Unable to delete existing shapefile." ) )
-                return
-        layer = getVectorLayerByName( myLayer )
-        provider = layer.dataProvider()
-        provider.select(layer.pendingAllAttributesList(), QgsRectangle(), True, True)
-        self.progressBar.setRange(0, provider.featureCount())
-        writer = QgsVectorFileWriter( self.shapefileName, self.encoding, provider.fields(), wkbType, layer.srs() )
-        outFeatures = iterFeatures(layer, attrName, wkbType, self.updateProgressBar)
-        for outFeat in outFeatures:
-            writer.addFeature(outFeat)
-        del writer
+def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None):
+    """Create a shapefile of polygons or polylines from vertices."""
+    check = QFile(outFileName)
+    if check.exists():
+        if not QgsVectorFileWriter.deleteShapeFile(outFileName):
+            raise FileDeletionError
+    provider = inLayer.dataProvider()
+    provider.select(inLayer.pendingAllAttributesList(), QgsRectangle(), True, True)
+    writer = QgsVectorFileWriter(outFileName, encoding, provider.fields(), wkbType, inLayer.srs())
+    outFeatures = iterFeatures(inLayer, attrName, wkbType, hookFunc)
+    for outFeat in outFeatures:
+        writer.addFeature(outFeat)
+    del writer
 
-
-#developed by Goyo Diaz (goyodiaz@gmail.com)            
+          
 def iterPoints(layer, hookFunc=None):
     """
     Iterate over the features of a point layer.
@@ -151,7 +152,6 @@ def iterPoints(layer, hookFunc=None):
         yield(QgsPoint(x, y), feat.attributeMap())
 
 
-#developed by Goyo Diaz (goyodiaz@gmail.com)   
 def iterGroups(layer, attrName, hookFunc=None):
     """
     Iterate over the features of a point layer grouping by attribute.
@@ -172,8 +172,7 @@ def iterGroups(layer, attrName, hookFunc=None):
     else:
         return [(None, points)]
 
-
-#developed by Goyo Diaz (goyodiaz@gmail.com)  
+ 
 def iterFeatures(layer, attrName, wkbType, hookFunc=None):
     """
     Iterate over features with vertices in a point layer.
@@ -191,7 +190,6 @@ def iterFeatures(layer, attrName, wkbType, hookFunc=None):
         yield feature
 
 
-#developed by Goyo Diaz (goyodiaz@gmail.com)   
 def makeFeature(points, wkbType):
     """
     Return a feature with given vertices.
@@ -276,3 +274,7 @@ def addShapeToCanvas( shapeFilePath ):
     else:   
         return False
 
+
+class FileDeletionError(Exception):
+    """Exception raised when a file can't be deleted."""
+    pass
