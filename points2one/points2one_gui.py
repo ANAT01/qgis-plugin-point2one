@@ -26,6 +26,8 @@
 #---------------------------------------------------------------------
 
 from itertools import groupby
+from os.path import basename
+from os.path import splitext
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -253,27 +255,24 @@ def saveDialog( parent ):
     fileDialog.setAcceptMode( QFileDialog.AcceptSave )
     fileDialog.setConfirmOverwrite( True )
     if not fileDialog.exec_() == QDialog.Accepted:
-            return None, None
+        return None, None
     files = fileDialog.selectedFiles()
     settings.setValue("/UI/lastShapefileDir", QVariant( QFileInfo( unicode( files.first() ) ).absolutePath() ) )
     return ( unicode( files.first() ), unicode( fileDialog.encoding() ) )
 
-
 # Convinience function to add a vector layer to canvas based on input shapefile path ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
-def addShapeToCanvas( shapeFilePath ):
-    shapeFilePathList = shapeFilePath.split( "/" )
-    layerName = QString( shapeFilePathList[len(shapeFilePathList)-1] )
-    if layerName.endsWith( ".shp" ):
-        layerName = unicode( layerName ).rstrip( ".shp" )
-    vlayer_new = QgsVectorLayer( shapeFilePath, layerName, "ogr" )
-
+def addShapeToCanvas(shapeFilePath):
+    layerName = basename(shapeFilePath)
+    root, ext = splitext(layerName)
+    if ext == '.shp':
+        layerName = root
+    vlayer_new = QgsVectorLayer(shapeFilePath, layerName, "ogr")
     if vlayer_new.isValid():
         QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
         return True
     else:   
         return False
-
 
 class FileDeletionError(Exception):
     """Exception raised when a file can't be deleted."""
