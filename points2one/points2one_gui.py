@@ -46,9 +46,6 @@ class points2One( QDialog, Ui_Dialog ):
         self.setEncodings(getEncodings())
         self.manageGui()   
         self.show()
-        # self.success = False
-        # self.cancel_close = self.buttonBox_2.button( QDialogButtonBox.Close )
-        # self.progressBar.setValue(0)
 
     def setEncodings(self, names):
         """Set the list of available encodings to names."""
@@ -129,6 +126,7 @@ class points2One( QDialog, Ui_Dialog ):
     def getOutEncoding(self):
         """Return the selected encoding for the output shapefile."""
         return self.cmbOutEncoding.currentText()
+
 
 def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None):
     """Create a shapefile of polygons or polylines from vertices."""
@@ -272,7 +270,7 @@ def saveDialog_old( parent ):
 
 
 def saveDialog_new(parent):
-    """Shows a save file dialog and return the file path."""
+    """Shows a save file dialog and return the selected file path."""
     settings = QSettings()
     key = '/UI/lastShapefileDir'
     outPath = settings.value(key).toString()
@@ -305,7 +303,7 @@ def addShapeToCanvas(shapeFilePath):
         return False
 
 
-def getEncodings():
+def getEncodings_old():
     """Return a list of available encodings."""
     return ['BIG5', 'BIG5-HKSCS', 'EUCJP', 'EUCKR', 'GB2312', 'GBK',
             'GB18030', 'JIS7', 'SHIFT-JIS', 'TSCII', 'UTF-8', 'UTF-16',
@@ -316,6 +314,16 @@ def getEncodings():
             'IBM 866', 'CP874', 'CP1250', 'CP1251', 'CP1252', 'CP1253',
             'CP1254', 'CP1255', 'CP1256', 'CP1257', 'CP1258',
             'Apple Roman', 'TIS-620']
+
+
+def getEncodings_new():
+    """Return a list of available encodings."""
+    names = [QString(QTextCodec.codecForMib(mib).name()) 
+             for mib in QTextCodec.availableMibs()]
+    return names
+
+
+getEncodings = getEncodings_new
 
 
 class FileDeletionError(Exception):
