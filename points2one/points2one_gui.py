@@ -43,11 +43,17 @@ class points2One( QDialog, Ui_Dialog ):
         QObject.connect( self.btnBrowse, SIGNAL( "clicked()" ), self.outFile )
         QObject.connect( self.inShape, SIGNAL( "currentIndexChanged(QString)" ), self.checkLayer )
         QObject.connect( self.inShape, SIGNAL( "currentIndexChanged(QString)" ), self.update )
-        self.manageGui()            
+        self.setEncodings(getEncodings())
+        self.manageGui()   
         self.show()
-        self.success = False
-        self.cancel_close = self.buttonBox_2.button( QDialogButtonBox.Close )
-        self.progressBar.setValue(0)
+        # self.success = False
+        # self.cancel_close = self.buttonBox_2.button( QDialogButtonBox.Close )
+        # self.progressBar.setValue(0)
+
+    def setEncodings(self, names):
+        """Set the list of available encodings to names."""
+        self.cmbOutEncoding.clear()
+        self.cmbOutEncoding.addItems(names)
 
     def updateProgressBar(self):
         self.progressBar.setValue(self.progressBar.value() + 1)
@@ -101,7 +107,7 @@ class points2One( QDialog, Ui_Dialog ):
                 attrName = None
             self.progressBar.setRange(0, provider.featureCount())
             try:
-                points2one(layer, self.shapefileName, self.encoding, wkbType, attrName, self.updateProgressBar)
+                points2one(layer, self.shapefileName, self.getOutEncoding(), wkbType, attrName, self.updateProgressBar)
             except FileDeletionError:
                 QMessageBox.warning(self, 'Points2One', self.tr('Unable to delete existing shapefile.'))
                 return
@@ -115,10 +121,14 @@ class points2One( QDialog, Ui_Dialog ):
         
     def outFile( self ):
         self.outShape.clear()
-        ( self.shapefileName, self.encoding ) = saveDialog( self )
-        if self.shapefileName is None or self.encoding is None:
+        self.shapefileName = saveDialog(self)
+        if not self.shapefileName:
             return
         self.outShape.setText( QString( self.shapefileName ) )
+
+    def getOutEncoding(self):
+        """Return the selected encoding for the output shapefile."""
+        return self.cmbOutEncoding.currentText()
 
 def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None):
     """Create a shapefile of polygons or polylines from vertices."""
@@ -136,8 +146,7 @@ def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None)
 
           
 def iterPoints(layer, hookFunc=None):
-    """
-    Iterate over the features of a point layer.
+    """Iterate over the features of a point layer.
 
     Yield pairs of the form (QgsPoint, attributeMap).
     Each time a vertice is read hookFunc is called.
@@ -155,8 +164,7 @@ def iterPoints(layer, hookFunc=None):
 
 
 def iterGroups(layer, attrName, hookFunc=None):
-    """
-    Iterate over the features of a point layer grouping by attribute.
+    """Iterate over the features of a point layer grouping by attribute.
 
     Return an iterator of (key, points) pairs where key is the attribute
     value and points is an iterator of (QgsPoint, attributeMap) pairs.
@@ -193,8 +201,7 @@ def iterFeatures(layer, attrName, wkbType, hookFunc=None):
 
 
 def makeFeature(points, wkbType):
-    """
-    Return a feature with given vertices.
+    """Return a feature with given vertices.
 
     Vertices are given as (QgsPoint, attributeMap) pairs. Returned
     feature is polygon or polyline depending on wkbType.
@@ -227,6 +234,7 @@ def getVectorLayerByName( myName ):
             else:
                 return None
 
+
 # Return list of names of all layers in QgsMapLayerRegistry
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
 def getLayerNames( vTypes ):
@@ -242,9 +250,10 @@ def getLayerNames( vTypes ):
                     layerlist.append( unicode( layer.name() ) )
     return layerlist
 
+
 # Generate a save file dialog with a dropdown box for choosing encoding style
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
-def saveDialog( parent ):
+def saveDialog_old( parent ):
     settings = QSettings()
     dirName = settings.value( "/UI/lastShapefileDir" ).toString()
     filtering = QString( "Shapefiles (*.shp)" )
@@ -258,7 +267,28 @@ def saveDialog( parent ):
         return None, None
     files = fileDialog.selectedFiles()
     settings.setValue("/UI/lastShapefileDir", QVariant( QFileInfo( unicode( files.first() ) ).absolutePath() ) )
-    return ( unicode( files.first() ), unicode( fileDialog.encoding() ) )
+    # return ( unicode( files.first() ), unicode( fileDialog.encoding() ) )
+    return unicode(files.first())
+
+
+def saveDialog_new(parent):
+    """Shows a save file dialog and return the file path."""
+    settings = QSettings()
+    key = '/UI/lastShapefileDir'
+    outPath = settings.value(key).toString()
+    filter = 'Shapefiles (*.shp)'
+    outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outPath, filter=filter)
+    if outFilePath:
+        # XXX outFilePath is not a directory path.
+        dir = QDir(outFilePath)
+        dir.cdUp()
+        outPath = dir.absolutePath()
+        settings.setValue(key, outPath)
+    return outFilePath
+
+
+saveDialog = saveDialog_new
+
 
 # Convinience function to add a vector layer to canvas based on input shapefile path ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
@@ -273,6 +303,20 @@ def addShapeToCanvas(shapeFilePath):
         return True
     else:   
         return False
+
+
+def getEncodings():
+    """Return a list of available encodings."""
+    return ['BIG5', 'BIG5-HKSCS', 'EUCJP', 'EUCKR', 'GB2312', 'GBK',
+            'GB18030', 'JIS7', 'SHIFT-JIS', 'TSCII', 'UTF-8', 'UTF-16',
+            'KOI8-R', 'KOI8-U', 'ISO8859-1', 'ISO8859-2', 'ISO8859-3',
+            'ISO8859-4', 'ISO8859-5', 'ISO8859-6', 'ISO8859-7',
+            'ISO8859-8', 'ISO8859-8-I', 'ISO8859-9', 'ISO8859-10',
+            'ISO8859-13', 'ISO8859-14', 'ISO8859-15', 'IBM 850',
+            'IBM 866', 'CP874', 'CP1250', 'CP1251', 'CP1252', 'CP1253',
+            'CP1254', 'CP1255', 'CP1256', 'CP1257', 'CP1258',
+            'Apple Roman', 'TIS-620']
+
 
 class FileDeletionError(Exception):
     """Exception raised when a file can't be deleted."""
