@@ -31,7 +31,7 @@ def description():
 	return "Tool for creating polygon or polyline from ordered points. Does not deal with rings and parts"
 
 def version():
-	return "0.2.2dev"
+	return "0.2.2"
   
 def qgisMinimumVersion():
 	return "1.0"
@@ -42,4 +42,3 @@ def authorName():
 def classFactory( iface ):
 	from points2one_plugin import points2one
 	return points2one( iface )
-
