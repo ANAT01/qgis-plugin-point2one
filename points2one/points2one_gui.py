@@ -35,6 +35,7 @@ from qgis.core import *
 from qgis.gui import *
 from ui_frmPoints2One import Ui_Dialog
 
+
 class points2One( QDialog, Ui_Dialog ):
     def __init__( self, iface ):
         QDialog.__init__( self )
@@ -145,7 +146,6 @@ def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None,
         writer.addFeature(outFeat)
     del writer
 
-          
 def iterPoints(layer, hookFunc=None):
     """Iterate over the features of a point layer.
 
@@ -162,7 +162,6 @@ def iterPoints(layer, hookFunc=None):
         x = geom.asPoint().x()
         y = geom.asPoint().y()
         yield(QgsPoint(x, y), feat.attributeMap())
-
 
 def iterGroups(layer, attrName, hookFunc=None, sort=False):
     """Iterate over the features of a point layer grouping by attribute.
@@ -185,7 +184,6 @@ def iterGroups(layer, attrName, hookFunc=None, sort=False):
     else:
         return [(None, points)]
 
- 
 def iterFeatures(layer, attrName, wkbType, hookFunc=None, sort=False):
     """
     Iterate over features with vertices in a point layer.
@@ -201,7 +199,6 @@ def iterFeatures(layer, attrName, wkbType, hookFunc=None, sort=False):
     for key, points in groups:
         feature = makeFeature(points, wkbType)
         yield feature
-
 
 def makeFeature(points, wkbType):
     """Return a feature with given vertices.
@@ -229,7 +226,6 @@ def makeFeature(points, wkbType):
     feature.setAttributeMap(atMap)
     return feature
                                                                        
-
 # Return QgsVectorLayer from a layer name ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
 def getVectorLayerByName( myName ):
@@ -240,7 +236,6 @@ def getVectorLayerByName( myName ):
                 return layer
             else:
                 return None
-
 
 # Return list of names of all layers in QgsMapLayerRegistry
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
@@ -257,27 +252,6 @@ def getLayerNames( vTypes ):
                     layerlist.append( unicode( layer.name() ) )
     return layerlist
 
-
-# Generate a save file dialog with a dropdown box for choosing encoding style
-# adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
-def saveDialog_old( parent ):
-    settings = QSettings()
-    dirName = settings.value( "/UI/lastShapefileDir" ).toString()
-    filtering = QString( "Shapefiles (*.shp)" )
-    encode = settings.value( "/UI/encoding" ).toString()
-    fileDialog = QgsEncodingFileDialog( parent, "Save output shapefile", dirName, filtering, encode )
-    fileDialog.setDefaultSuffix( QString( "shp" ) )
-    fileDialog.setFileMode( QFileDialog.AnyFile )
-    fileDialog.setAcceptMode( QFileDialog.AcceptSave )
-    fileDialog.setConfirmOverwrite( True )
-    if not fileDialog.exec_() == QDialog.Accepted:
-        return None, None
-    files = fileDialog.selectedFiles()
-    settings.setValue("/UI/lastShapefileDir", QVariant( QFileInfo( unicode( files.first() ) ).absolutePath() ) )
-    # return ( unicode( files.first() ), unicode( fileDialog.encoding() ) )
-    return unicode(files.first())
-
-
 def saveDialog_new(parent):
     """Shows a save file dialog and return the selected file path."""
     settings = QSettings()
@@ -286,6 +260,8 @@ def saveDialog_new(parent):
     filter = 'Shapefiles (*.shp)'
     outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outPath, filter=filter)
     if outFilePath:
+        if outFilePath.right(4) != '.shp':
+            outFilePath = '%s.shp' % outPath
         # XXX outFilePath is not a directory path.
         dir = QDir(outFilePath)
         dir.cdUp()
@@ -293,9 +269,7 @@ def saveDialog_new(parent):
         settings.setValue(key, outPath)
     return outFilePath
 
-
 saveDialog = saveDialog_new
-
 
 # Convinience function to add a vector layer to canvas based on input shapefile path ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
@@ -311,7 +285,6 @@ def addShapeToCanvas(shapeFilePath):
     else:   
         return False
 
-
 def getEncodings_old():
     """Return a list of available encodings."""
     return ['BIG5', 'BIG5-HKSCS', 'EUCJP', 'EUCKR', 'GB2312', 'GBK',
@@ -324,16 +297,13 @@ def getEncodings_old():
             'CP1254', 'CP1255', 'CP1256', 'CP1257', 'CP1258',
             'Apple Roman', 'TIS-620']
 
-
 def getEncodings_new():
     """Return a list of available encodings."""
     names = [QString(QTextCodec.codecForMib(mib).name()) 
              for mib in QTextCodec.availableMibs()]
     return names
 
-
 getEncodings = getEncodings_new
-
 
 class FileDeletionError(Exception):
     """Exception raised when a file can't be deleted."""
