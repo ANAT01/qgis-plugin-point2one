@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'frmPoints2One.ui'
 #
-# Created: Sat Jun  5 03:20:40 2010
+# Created: Sat Jun  5 18:58:54 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -63,7 +63,6 @@ class Ui_Dialog(object):
         self.hboxlayout = QtGui.QHBoxLayout()
         self.hboxlayout.setObjectName("hboxlayout")
         self.outShape = QtGui.QLineEdit(self.groupBox_2)
-        self.outShape.setReadOnly(True)
         self.outShape.setObjectName("outShape")
         self.hboxlayout.addWidget(self.outShape)
         self.btnBrowse = QtGui.QPushButton(self.groupBox_2)
@@ -119,6 +118,15 @@ class Ui_Dialog(object):
         QtCore.QObject.connect(self.rdoKeyName, QtCore.SIGNAL("toggled(bool)"), self.attrName.setEnabled)
         QtCore.QObject.connect(self.rdoKeyName, QtCore.SIGNAL("toggled(bool)"), self.chbSort.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+        Dialog.setTabOrder(self.inShape, self.rdoPolygon)
+        Dialog.setTabOrder(self.rdoPolygon, self.rdoPolyline)
+        Dialog.setTabOrder(self.rdoPolyline, self.rdoKeyName)
+        Dialog.setTabOrder(self.rdoKeyName, self.attrName)
+        Dialog.setTabOrder(self.attrName, self.chbSort)
+        Dialog.setTabOrder(self.chbSort, self.outShape)
+        Dialog.setTabOrder(self.outShape, self.btnBrowse)
+        Dialog.setTabOrder(self.btnBrowse, self.cmbOutEncoding)
+        Dialog.setTabOrder(self.cmbOutEncoding, self.buttonBox_2)
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Points2One", None, QtGui.QApplication.UnicodeUTF8))

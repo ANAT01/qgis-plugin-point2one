@@ -110,11 +110,7 @@
         <item>
          <layout class="QHBoxLayout">
           <item>
-           <widget class="QLineEdit" name="outShape">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="outShape"/>
           </item>
           <item>
            <widget class="QPushButton" name="btnBrowse">
@@ -204,6 +200,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>inShape</tabstop>
+  <tabstop>rdoPolygon</tabstop>
+  <tabstop>rdoPolyline</tabstop>
+  <tabstop>rdoKeyName</tabstop>
+  <tabstop>attrName</tabstop>
+  <tabstop>chbSort</tabstop>
+  <tabstop>outShape</tabstop>
+  <tabstop>btnBrowse</tabstop>
+  <tabstop>cmbOutEncoding</tabstop>
+  <tabstop>buttonBox_2</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -213,8 +221,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
-     <y>373</y>
+     <x>301</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -229,8 +237,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
-     <y>373</y>
+     <x>301</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>335</x>
