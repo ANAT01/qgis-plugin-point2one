@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>313</width>
-    <height>403</height>
+    <height>428</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -168,6 +168,16 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="chbSort">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Sort points by this field</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -230,7 +240,7 @@
   </connection>
   <connection>
    <sender>rdoKeyName</sender>
-   <signal>clicked(bool)</signal>
+   <signal>toggled(bool)</signal>
    <receiver>attrName</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
@@ -241,6 +251,22 @@
     <hint type="destinationlabel">
      <x>161</x>
      <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdoKeyName</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chbSort</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>198</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>160</x>
+     <y>253</y>
     </hint>
    </hints>
   </connection>

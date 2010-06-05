@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'frmPoints2One.ui'
 #
-# Created: Thu Jun  3 13:38:20 2010
+# Created: Sat Jun  5 03:20:40 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(313, 403)
+        Dialog.resize(313, 428)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -93,6 +93,10 @@ class Ui_Dialog(object):
         self.attrName.setEnabled(False)
         self.attrName.setObjectName("attrName")
         self.verticalLayout_3.addWidget(self.attrName)
+        self.chbSort = QtGui.QCheckBox(self.groupBox1)
+        self.chbSort.setEnabled(False)
+        self.chbSort.setObjectName("chbSort")
+        self.verticalLayout_3.addWidget(self.chbSort)
         self.gridLayout_2.addWidget(self.groupBox1, 2, 0, 1, 1)
         self.groupBox2 = QtGui.QGroupBox(Dialog)
         self.groupBox2.setObjectName("groupBox2")
@@ -112,7 +116,8 @@ class Ui_Dialog(object):
         self.retranslateUi(Dialog)
         QtCore.QObject.connect(self.buttonBox_2, QtCore.SIGNAL("rejected()"), Dialog.reject)
         QtCore.QObject.connect(self.buttonBox_2, QtCore.SIGNAL("accepted()"), Dialog.accept)
-        QtCore.QObject.connect(self.rdoKeyName, QtCore.SIGNAL("clicked(bool)"), self.attrName.setEnabled)
+        QtCore.QObject.connect(self.rdoKeyName, QtCore.SIGNAL("toggled(bool)"), self.attrName.setEnabled)
+        QtCore.QObject.connect(self.rdoKeyName, QtCore.SIGNAL("toggled(bool)"), self.chbSort.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
@@ -125,5 +130,6 @@ class Ui_Dialog(object):
         self.encodingLabel.setText(QtGui.QApplication.translate("Dialog", "Encoding", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox1.setTitle(QtGui.QApplication.translate("Dialog", "Multiple processing", None, QtGui.QApplication.UnicodeUTF8))
         self.rdoKeyName.setText(QtGui.QApplication.translate("Dialog", "Create output features based on input field ", None, QtGui.QApplication.UnicodeUTF8))
+        self.chbSort.setText(QtGui.QApplication.translate("Dialog", "Sort points by this field", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox2.setTitle(QtGui.QApplication.translate("Dialog", "Input point layer", None, QtGui.QApplication.UnicodeUTF8))
 

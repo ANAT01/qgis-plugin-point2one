@@ -104,7 +104,7 @@ class points2One( QDialog, Ui_Dialog ):
                 attrName = None
             self.progressBar.setRange(0, provider.featureCount())
             try:
-                points2one(layer, self.shapefileName, self.getOutEncoding(), wkbType, attrName, self.updateProgressBar)
+                points2one(layer, self.shapefileName, self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
             except FileDeletionError:
                 QMessageBox.warning(self, 'Points2One', self.tr('Unable to delete existing shapefile.'))
                 return
@@ -127,8 +127,11 @@ class points2One( QDialog, Ui_Dialog ):
         """Return the selected encoding for the output shapefile."""
         return self.cmbOutEncoding.currentText()
 
+    def getSort(self):
+        return self.chbSort.isChecked()
 
-def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None):
+
+def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None, sort=False):
     """Create a shapefile of polygons or polylines from vertices."""
     check = QFile(outFileName)
     if check.exists():
@@ -137,7 +140,7 @@ def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None)
     provider = inLayer.dataProvider()
     provider.select(inLayer.pendingAllAttributesList(), QgsRectangle(), True, True)
     writer = QgsVectorFileWriter(outFileName, encoding, provider.fields(), wkbType, inLayer.srs())
-    outFeatures = iterFeatures(inLayer, attrName, wkbType, hookFunc)
+    outFeatures = iterFeatures(inLayer, attrName, wkbType, hookFunc, sort)
     for outFeat in outFeatures:
         writer.addFeature(outFeat)
     del writer
@@ -161,7 +164,7 @@ def iterPoints(layer, hookFunc=None):
         yield(QgsPoint(x, y), feat.attributeMap())
 
 
-def iterGroups(layer, attrName, hookFunc=None):
+def iterGroups(layer, attrName, hookFunc=None, sort=False):
     """Iterate over the features of a point layer grouping by attribute.
 
     Return an iterator of (key, points) pairs where key is the attribute
@@ -176,12 +179,14 @@ def iterGroups(layer, attrName, hookFunc=None):
         attrIdx = provider.fieldNameIndex(attrName)
         if attrIdx < 0:
             raise UnknownAttributeError
+        if sort:
+            points = sorted(points, key=lambda p: p[1][attrIdx].toString())
         return groupby(points, lambda p: p[1][attrIdx])
     else:
         return [(None, points)]
 
  
-def iterFeatures(layer, attrName, wkbType, hookFunc=None):
+def iterFeatures(layer, attrName, wkbType, hookFunc=None, sort=False):
     """
     Iterate over features with vertices in a point layer.
 
@@ -192,7 +197,7 @@ def iterFeatures(layer, attrName, wkbType, hookFunc=None):
 
     """
 
-    groups = iterGroups(layer, attrName, hookFunc)
+    groups = iterGroups(layer, attrName, hookFunc, sort)
     for key, points in groups:
         feature = makeFeature(points, wkbType)
         yield feature
@@ -212,8 +217,12 @@ def makeFeature(points, wkbType):
     atMap = point[1]
     feature = QgsFeature()
     if wkbType == QGis.WKBLineString:
+        if len(pointList) < 2:
+            raise ValueError, 'Can\'t make a plyline out of %s points' % len(pointList)
         feature.setGeometry(QgsGeometry.fromPolyline(pointList))
     elif wkbType == QGis.WKBPolygon:
+        if len(pointList) < 3:
+            raise ValueError, 'Can\'t make a polygon out of %s points' % len(pointList)
         feature.setGeometry(QgsGeometry.fromPolygon([pointList]))
     else:
         raise ValueError, 'Invalid geometry type: %s.' % wkbType
