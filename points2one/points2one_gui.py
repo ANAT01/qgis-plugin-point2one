@@ -49,9 +49,11 @@ class points2One( QDialog, Ui_Dialog ):
         self.show()
 
     def setEncodings(self, names):
-        """Set the list of available encodings to names."""
+        """Populate the combo box of available encodings."""
         self.cmbOutEncoding.clear()
         self.cmbOutEncoding.addItems(names)
+        index = self.cmbOutEncoding.findText(getDefaultEncoding())
+        self.cmbOutEncoding.setCurrentIndex(index)
 
     def updateProgressBar(self):
         self.progressBar.setValue(self.progressBar.value() + 1)
@@ -104,6 +106,8 @@ class points2One( QDialog, Ui_Dialog ):
             else:
                 attrName = None
             self.progressBar.setRange(0, provider.featureCount())
+            settings = QSettings()
+            settings.setValue('/UI/encoding', self.getOutEncoding())
             try:
                 points2one(layer, self.shapefileName, self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
             except FileDeletionError:
@@ -252,7 +256,7 @@ def getLayerNames( vTypes ):
                     layerlist.append( unicode( layer.name() ) )
     return layerlist
 
-def saveDialog_new(parent):
+def saveDialog(parent):
     """Shows a save file dialog and return the selected file path."""
     settings = QSettings()
     key = '/UI/lastShapefileDir'
@@ -269,8 +273,6 @@ def saveDialog_new(parent):
         settings.setValue(key, outPath)
     return outFilePath
 
-saveDialog = saveDialog_new
-
 # Convinience function to add a vector layer to canvas based on input shapefile path ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
 def addShapeToCanvas(shapeFilePath):
@@ -285,25 +287,16 @@ def addShapeToCanvas(shapeFilePath):
     else:   
         return False
 
-def getEncodings_old():
-    """Return a list of available encodings."""
-    return ['BIG5', 'BIG5-HKSCS', 'EUCJP', 'EUCKR', 'GB2312', 'GBK',
-            'GB18030', 'JIS7', 'SHIFT-JIS', 'TSCII', 'UTF-8', 'UTF-16',
-            'KOI8-R', 'KOI8-U', 'ISO8859-1', 'ISO8859-2', 'ISO8859-3',
-            'ISO8859-4', 'ISO8859-5', 'ISO8859-6', 'ISO8859-7',
-            'ISO8859-8', 'ISO8859-8-I', 'ISO8859-9', 'ISO8859-10',
-            'ISO8859-13', 'ISO8859-14', 'ISO8859-15', 'IBM 850',
-            'IBM 866', 'CP874', 'CP1250', 'CP1251', 'CP1252', 'CP1253',
-            'CP1254', 'CP1255', 'CP1256', 'CP1257', 'CP1258',
-            'Apple Roman', 'TIS-620']
-
-def getEncodings_new():
+def getEncodings():
     """Return a list of available encodings."""
     names = [QString(QTextCodec.codecForMib(mib).name()) 
-             for mib in QTextCodec.availableMibs()]
+             for mib in sorted(QTextCodec.availableMibs())]
     return names
 
-getEncodings = getEncodings_new
+def getDefaultEncoding():
+    """Return the default encoding as a QString."""
+    settings = QSettings()
+    return settings.value('/UI/encoding').toString()
 
 class FileDeletionError(Exception):
     """Exception raised when a file can't be deleted."""
