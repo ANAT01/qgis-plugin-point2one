@@ -30,11 +30,13 @@ import zipfile as zip
 
 dirs = {
     'points2one': [
+        'frmPoints2One.ui'
         '__init__.py',
         'points2one.png',
         'points2one_gui.py',
         'points2one_plugin.py',
         'resources.py',
+        'resources.qrc'
         'ui_frmPoints2One.py'],
     '': [
         'LICENSE.txt']}
