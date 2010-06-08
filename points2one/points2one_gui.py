@@ -258,7 +258,7 @@ def saveDialog_new(parent):
     key = '/UI/lastShapefileDir'
     outPath = settings.value(key).toString()
     filter = 'Shapefiles (*.shp)'
-    outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outPath, filter=filter)
+    outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outPath, filter)
     if outFilePath:
         if outFilePath.right(4) != '.shp':
             outFilePath = '%s.shp' % outPath
