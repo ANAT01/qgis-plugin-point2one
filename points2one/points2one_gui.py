@@ -290,7 +290,7 @@ def addShapeToCanvas(shapeFilePath):
 def getEncodings():
     """Return a list of available encodings."""
     names = [QString(QTextCodec.codecForMib(mib).name()) 
-             for mib in sorted(QTextCodec.availableMibs())]
+             for mib in QTextCodec.availableMibs()]
     return names
 
 def getDefaultEncoding():
