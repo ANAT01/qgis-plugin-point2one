@@ -135,6 +135,14 @@ class points2One( QDialog, Ui_Dialog ):
     def getSort(self):
         return self.chbSort.isChecked()
 
+    def getOutFilePath(self):
+        """Return the output file path."""
+        return self.outShape.text()
+
+    def setOutFilePath(self, outFilePath):
+        """Set the output file path."""
+        self.outshape.setText(outFilePath)
+
 
 def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None, sort=False):
     """Create a shapefile of polygons or polylines from vertices."""
