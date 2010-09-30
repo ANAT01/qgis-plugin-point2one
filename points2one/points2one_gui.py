@@ -93,10 +93,9 @@ class points2One( QDialog, Ui_Dialog ):
             QMessageBox.warning( self, "Points2One", self.tr( "Polygon: Please select input layer with at least 3 points" ) )
         elif self.attrName.isEnabled() and self.attrName.currentText() == "":
             QMessageBox.warning( self, "Points2One", self.tr( "Please define specific input field" ) )
-        elif self.outShape.text() == "":
+        elif self.getOutFilePath() == "":
             QMessageBox.warning( self, "Points2One", self.tr( "Please specify output shapefile" ) )
         else:
-            self.outShape.clear()
             if self.rdoPolyline.isChecked():
                 wkbType = QGis.WKBLineString
             else:
@@ -122,11 +121,10 @@ class points2One( QDialog, Ui_Dialog ):
             self.progressBar.setValue(0) 
         
     def outFile( self ):
-        self.outShape.clear()
         self.shapefileName = saveDialog(self)
         if not self.shapefileName:
             return
-        self.outShape.setText( QString( self.shapefileName ) )
+        self.setOutFilePath(QString( self.shapefileName ))
 
     def getOutEncoding(self):
         """Return the selected encoding for the output shapefile."""
@@ -141,7 +139,7 @@ class points2One( QDialog, Ui_Dialog ):
 
     def setOutFilePath(self, outFilePath):
         """Set the output file path."""
-        self.outshape.setText(outFilePath)
+        self.outShape.setText(outFilePath)
 
 
 def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None, sort=False):
