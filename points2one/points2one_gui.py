@@ -27,6 +27,7 @@
 
 from itertools import groupby
 from os.path import basename
+from os.path import dirname
 from os.path import splitext
 
 from PyQt4.QtCore import *
@@ -267,17 +268,16 @@ def saveDialog(parent):
     """Shows a save file dialog and return the selected file path."""
     settings = QSettings()
     key = '/UI/lastShapefileDir'
-    outPath = settings.value(key).toString()
+    outDir = settings.value(key).toString()
     filter = 'Shapefiles (*.shp)'
-    outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outPath, filter)
+    outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outDir, filter)
+    outFilePath = unicode(outFilePath)
     if outFilePath:
-        if outFilePath.right(4) != '.shp':
-            outFilePath = '%s.shp' % outPath
-        # XXX outFilePath is not a directory path.
-        dir = QDir(outFilePath)
-        dir.cdUp()
-        outPath = dir.absolutePath()
-        settings.setValue(key, outPath)
+        root, ext = splitext(outFilePath)
+        if ext.upper() != '.SHP':
+            outFilePath = '%s.shp' % outFilePath
+        outDir = dirname(outFilePath)
+        settings.setValue(key, outDir)
     return outFilePath
 
 # Convinience function to add a vector layer to canvas based on input shapefile path ( as string )
