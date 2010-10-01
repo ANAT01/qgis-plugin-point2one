@@ -25,7 +25,6 @@ packaging guidelines.
 """
 
 import os
-import shutil as sh
 import zipfile as zip
 
 dirs = {
