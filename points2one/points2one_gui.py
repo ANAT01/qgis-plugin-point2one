@@ -108,23 +108,24 @@ class points2One( QDialog, Ui_Dialog ):
             settings = QSettings()
             settings.setValue('/UI/encoding', self.getOutEncoding())
             try:
-                points2one(layer, self.shapefileName, self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
+                points2one(layer, self.getOutFilePath(), self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
             except FileDeletionError:
                 QMessageBox.warning(self, 'Points2One', self.tr('Unable to delete existing shapefile.'))
                 return
             out_text = "\n"
             end_text = self.tr( "\nWould you like to add the new layer to the TOC?" )
-            addToTOC = QMessageBox.question( self, "Points2One", self.tr( "Created output shapefile:" ) + "\n"
-            + unicode( self.shapefileName ) + out_text + end_text, QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton )
+            addToTOC = QMessageBox.question(self, "Points2One", self.tr("Created output shapefile:") + "\n"
+            + unicode(self.getOutFilePath()) + out_text + end_text, QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton)
             if addToTOC == QMessageBox.Yes:
-                addShapeToCanvas( unicode( self.shapefileName ) )
+                addShapeToCanvas(unicode(self.getOutFilePath()))
             self.progressBar.setValue(0) 
         
-    def outFile( self ):
-        self.shapefileName = saveDialog(self)
-        if not self.shapefileName:
+    def outFile(self):
+        """Open a file save dialog and set the output file path."""
+        outFilePath = saveDialog(self)
+        if not outFilePath:
             return
-        self.setOutFilePath(QString( self.shapefileName ))
+        self.setOutFilePath(QString(outFilePath))
 
     def getOutEncoding(self):
         """Return the selected encoding for the output shapefile."""
