@@ -54,6 +54,8 @@ class points2One( QDialog, Ui_Dialog ):
         self.cmbOutEncoding.clear()
         self.cmbOutEncoding.addItems(names)
         index = self.cmbOutEncoding.findText(getDefaultEncoding())
+        if index == -1:
+            index = 0  # Make sure some encoding is selected.
         self.cmbOutEncoding.setCurrentIndex(index)
 
     def updateProgressBar(self):
@@ -107,7 +109,8 @@ class points2One( QDialog, Ui_Dialog ):
                 attrName = None
             self.progressBar.setRange(0, provider.featureCount())
             settings = QSettings()
-            settings.setValue('/UI/encoding', self.getOutEncoding())
+            encoding = self.getOutEncoding()
+            settings.setValue('/UI/encoding', encoding or 'System')
             try:
                 points2one(layer, self.getOutFilePath(), self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
             except FileDeletionError:
@@ -303,7 +306,8 @@ def getEncodings():
 def getDefaultEncoding():
     """Return the default encoding as a QString."""
     settings = QSettings()
-    return settings.value('/UI/encoding').toString()
+    current = settings.value('/UI/encoding').toString()
+    return current or QString('System')
 
 class FileDeletionError(Exception):
     """Exception raised when a file can't be deleted."""
