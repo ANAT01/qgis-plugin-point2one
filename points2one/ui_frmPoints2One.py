@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'frmPoints2One.ui'
 #
-# Created: Wed Jun  9 22:58:53 2010
+# Created: Sat Oct  2 01:50:12 2010
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,13 +12,14 @@ from PyQt4 import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(311, 401)
+        Dialog.resize(289, 377)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
+        self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.groupBox = QtGui.QGroupBox(Dialog)
         self.groupBox.setObjectName("groupBox")
@@ -95,6 +96,7 @@ class Ui_Dialog(object):
         spacerItem = QtGui.QSpacerItem(13, 13, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setSpacing(6)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.progressBar = QtGui.QProgressBar(Dialog)
         self.progressBar.setProperty("value", 0)
@@ -127,9 +129,9 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Points2One", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Dialog", "Input point layer", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox1.setTitle(QtGui.QApplication.translate("Dialog", "Points to one", None, QtGui.QApplication.UnicodeUTF8))
-        self.rdoPolygon.setText(QtGui.QApplication.translate("Dialog", "Polygon", None, QtGui.QApplication.UnicodeUTF8))
-        self.rdoPolyline.setText(QtGui.QApplication.translate("Dialog", "Polyline", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox1.setTitle(QtGui.QApplication.translate("Dialog", "Output geometries", None, QtGui.QApplication.UnicodeUTF8))
+        self.rdoPolygon.setText(QtGui.QApplication.translate("Dialog", "Polygons", None, QtGui.QApplication.UnicodeUTF8))
+        self.rdoPolyline.setText(QtGui.QApplication.translate("Dialog", "Lines", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox2.setTitle(QtGui.QApplication.translate("Dialog", "Multiple processing", None, QtGui.QApplication.UnicodeUTF8))
         self.rdoKeyName.setText(QtGui.QApplication.translate("Dialog", "Create output features based on input field ", None, QtGui.QApplication.UnicodeUTF8))
         self.chbSort.setText(QtGui.QApplication.translate("Dialog", "Sort points by this field", None, QtGui.QApplication.UnicodeUTF8))
