@@ -31,6 +31,7 @@ dirs = {
     'points2one': [
         'frmPoints2One.ui',
         '__init__.py',
+        'p2o_encodings.py',
         'points2one.png',
         'points2one_gui.py',
         'points2one_plugin.py',
