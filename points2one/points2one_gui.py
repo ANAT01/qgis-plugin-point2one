@@ -35,6 +35,9 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 from ui_frmPoints2One import Ui_Dialog
+from p2o_encodings import getEncodings
+from p2o_encodings import getDefaultEncoding
+from p2o_encodings import setDefaultEncoding
 
 
 class points2One( QDialog, Ui_Dialog ):
@@ -108,7 +111,7 @@ class points2One( QDialog, Ui_Dialog ):
             else:
                 attrName = None
             self.progressBar.setRange(0, provider.featureCount())
-            setDefaultEncoding(self.getOutEncoding)
+            setDefaultEncoding(self.getOutEncoding())
             try:
                 points2one(layer, self.getOutFilePath(), self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
             except FileDeletionError:
@@ -294,24 +297,6 @@ def addShapeToCanvas(shapeFilePath):
         return True
     else:   
         return False
-
-def getEncodings():
-    """Return a list of available encodings."""
-    names = [QString(QTextCodec.codecForMib(mib).name()) 
-             for mib in QTextCodec.availableMibs()]
-    return names
-
-def getDefaultEncoding():
-    """Return the default encoding as a QString."""
-    settings = QSettings()
-    current = settings.value('/UI/encoding').toString()
-    return current or QString('System')
-
-def setDefaultEncoding(encoding):
-    """Set the default encoding."""
-    settings = QSettings()
-    encoding = self.getOutEncoding() or 'System'
-    settings.setValue('/UI/encoding', encoding)
 
 
 class FileDeletionError(Exception):
