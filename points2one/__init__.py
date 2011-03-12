@@ -31,7 +31,7 @@ def description():
 	return "Tool for creating polygon or polyline from ordered points. Does not deal with rings and parts"
 
 def version():
-	return "0.2.7dev"
+	return "0.2.7"
   
 def qgisMinimumVersion():
 	return "1.0"
