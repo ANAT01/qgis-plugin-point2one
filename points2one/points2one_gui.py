@@ -34,10 +34,12 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
+
 from ui_frmPoints2One import Ui_Dialog
 from p2o_encodings import getEncodings
 from p2o_encodings import getDefaultEncoding
 from p2o_encodings import setDefaultEncoding
+from p2o_engine import Engine
 
 
 class points2One( QDialog, Ui_Dialog ):
@@ -112,15 +114,32 @@ class points2One( QDialog, Ui_Dialog ):
                 attrName = None
             self.progressBar.setRange(0, provider.featureCount())
             setDefaultEncoding(self.getOutEncoding())
+            engine = Engine(layer, self.getOutFilePath(), self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
             try:
-                points2one(layer, self.getOutFilePath(), self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
+                engine.run()
             except FileDeletionError:
                 QMessageBox.warning(self, 'Points2One', self.tr('Unable to delete existing shapefile.'))
                 return
-            out_text = "\n"
-            end_text = self.tr( "\nWould you like to add the new layer to the TOC?" )
-            addToTOC = QMessageBox.question(self, "Points2One", self.tr("Created output shapefile:") + "\n"
-            + unicode(self.getOutFilePath()) + out_text + end_text, QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton)
+
+            # Show warning
+            log_msg = '\n'.join(engine.get_logger())
+            if log_msg:
+                warningBox = QMessageBox(self)
+                warningBox.setWindowTitle('Points2One')
+                message = self.tr('Output shapefile created')
+                warningBox.setText(message)
+                message = self.tr('There were some issues, maybe some features could not be created.')
+                warningBox.setInformativeText(message)
+                warningBox.setDetailedText(log_msg)
+                warningBox.setIcon(QMessageBox.Warning)
+                warningBox.exec_()
+
+            message = unicode(self.tr('Created output shapefile:'))
+            message = '\n'.join([message, unicode(self.getOutFilePath())])
+            message = '\n'.join([message,
+                unicode(self.tr('Would you like to add the new layer to the TOC?'))])
+            addToTOC = QMessageBox.question(self, "Points2One", message,
+                QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton)
             if addToTOC == QMessageBox.Yes:
                 addShapeToCanvas(unicode(self.getOutFilePath()))
             self.progressBar.setValue(0) 
@@ -147,101 +166,7 @@ class points2One( QDialog, Ui_Dialog ):
         """Set the output file path."""
         self.outShape.setText(outFilePath)
 
-
-def points2one(inLayer, outFileName, encoding, wkbType, attrName, hookFunc=None, sort=False):
-    """Create a shapefile of polygons or polylines from vertices."""
-    check = QFile(outFileName)
-    if check.exists():
-        if not QgsVectorFileWriter.deleteShapeFile(outFileName):
-            raise FileDeletionError
-    provider = inLayer.dataProvider()
-    provider.select(inLayer.pendingAllAttributesList(), QgsRectangle(), True, True)
-    writer = QgsVectorFileWriter(outFileName, encoding, provider.fields(), wkbType, inLayer.srs())
-    outFeatures = iterFeatures(inLayer, attrName, wkbType, hookFunc, sort)
-    for outFeat in outFeatures:
-        writer.addFeature(outFeat)
-    del writer
-
-def iterPoints(layer, hookFunc=None):
-    """Iterate over the features of a point layer.
-
-    Yield pairs of the form (QgsPoint, attributeMap).
-    Each time a vertice is read hookFunc is called.
-
-    """
-
-    provider = layer.dataProvider()
-    feat = QgsFeature()
-    while(provider.nextFeature(feat)):
-        hookFunc()
-        geom = feat.geometry()
-        x = geom.asPoint().x()
-        y = geom.asPoint().y()
-        yield(QgsPoint(x, y), feat.attributeMap())
-
-def iterGroups(layer, attrName, hookFunc=None, sort=False):
-    """Iterate over the features of a point layer grouping by attribute.
-
-    Return an iterator of (key, points) pairs where key is the attribute
-    value and points is an iterator of (QgsPoint, attributeMap) pairs.
-    Each time a point is read hookFunc is called.
-
-    """
-
-    points = iterPoints(layer, hookFunc)
-    provider = layer.dataProvider()
-    if attrName:
-        attrIdx = provider.fieldNameIndex(attrName)
-        if attrIdx < 0:
-            raise UnknownAttributeError
-        if sort:
-            points = sorted(points, key=lambda p: p[1][attrIdx].toString())
-        return groupby(points, lambda p: p[1][attrIdx])
-    else:
-        return [(None, points)]
-
-def iterFeatures(layer, attrName, wkbType, hookFunc=None, sort=False):
-    """
-    Iterate over features with vertices in a point layer.
-
-    For each consecutive group of points with the same value for a given
-    attribute, yield a feature (polygon o polyline depending on
-    wkbType) with vertices in those points.
-    Each time a vertice is read hookFunc is called.
-
-    """
-
-    groups = iterGroups(layer, attrName, hookFunc, sort)
-    for key, points in groups:
-        feature = makeFeature(points, wkbType)
-        yield feature
-
-def makeFeature(points, wkbType):
-    """Return a feature with given vertices.
-
-    Vertices are given as (QgsPoint, attributeMap) pairs. Returned
-    feature is polygon or polyline depending on wkbType.
-
-    """
-
-    pointList = []
-    for point in points:
-        pointList.append(point[0])
-    atMap = point[1]
-    feature = QgsFeature()
-    if wkbType == QGis.WKBLineString:
-        if len(pointList) < 2:
-            raise ValueError, 'Can\'t make a plyline out of %s points' % len(pointList)
-        feature.setGeometry(QgsGeometry.fromPolyline(pointList))
-    elif wkbType == QGis.WKBPolygon:
-        if len(pointList) < 3:
-            raise ValueError, 'Can\'t make a polygon out of %s points' % len(pointList)
-        feature.setGeometry(QgsGeometry.fromPolygon([pointList]))
-    else:
-        raise ValueError, 'Invalid geometry type: %s.' % wkbType
-    feature.setAttributeMap(atMap)
-    return feature
-                                                                       
+                                                                           #~ 
 # Return QgsVectorLayer from a layer name ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
 def getVectorLayerByName( myName ):
