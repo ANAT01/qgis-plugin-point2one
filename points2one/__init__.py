@@ -39,6 +39,6 @@ def qgisMinimumVersion():
 def authorName():
 	return "Pavol Kapusta & Goyo"
 
-def classFactory( iface ):
+def classFactory(iface):
 	from points2one_plugin import points2one
-	return points2one( iface )
+	return points2one(iface)
