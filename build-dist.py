@@ -17,6 +17,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+# XXX Should use make for this?
+
 """Build a zip file for distribution.
 
 See http://pyqgis.org/admin/contributed/python_plugins/packaging for
@@ -28,7 +30,10 @@ import os
 import zipfile as zip
 
 dirs = {
-    'points2one': [
+    '': ([
+        'LICENSE.txt'],
+        'points2one'),
+    'points2one': ([
         'frmPoints2One.ui',
         '__init__.py',
         'p2o_encodings.py',
@@ -39,12 +44,18 @@ dirs = {
         'resources.py',
         'resources.qrc',
         'ui_frmPoints2One.py'],
-    '': [
-        'LICENSE.txt']}
+        'points2one'),
+    'points2one/i18n': ([
+        'points2one_es_ES.ts',
+        'points2one_es_ES.qm',
+        'points2one_fr_FR.ts',
+        'points2one_fr_FR.qm'],
+        os.path.join('points2one', 'i18n'))}
 
 zipfile = zip.ZipFile('points2one.zip', mode='w')
 for dirname in dirs:
-    for fname in dirs[dirname]:
+    destdir = dirs[dirname][1]
+    for fname in dirs[dirname][0]:
         zipfile.write(os.path.join(dirname, fname),
-                      os.path.join('points2one', fname))
+                      os.path.join(destdir, fname))
 zipfile.close()
