@@ -54,8 +54,14 @@ class Engine(object):
         provider = self.layer.dataProvider()
         provider.select(self.layer.pendingAllAttributesList(),
             QgsRectangle(), True, True)
-        writer = QgsVectorFileWriter(self.fname, self.encoding,
-            provider.fields(), self.wkb_type, self.layer.srs())
+        try:
+            # QGIS API version <= 1.8.0
+            writer = QgsVectorFileWriter(self.fname, self.encoding,
+                provider.fields(), self.wkb_type, self.layer.srs())
+        except AttributeError:
+            # QGIS API version > 1.8.0
+            writer = QgsVectorFileWriter(self.fname, self.encoding,
+                provider.fields(), self.wkb_type, self.layer.crs())
         for feature in self.iter_features():
             writer.addFeature(feature)
         del writer

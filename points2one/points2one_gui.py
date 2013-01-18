@@ -218,7 +218,10 @@ def addShapeToCanvas(shapeFilePath):
         layerName = root
     vlayer_new = QgsVectorLayer(shapeFilePath, layerName, "ogr")
     if vlayer_new.isValid():
-        QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
+        try:
+            QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
+        except AttributeError:
+            QgsMapLayerRegistry.instance().addMapLayers([vlayer_new])
         return True
     else:   
         return False
