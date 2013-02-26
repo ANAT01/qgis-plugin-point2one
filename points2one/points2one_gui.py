@@ -71,14 +71,14 @@ class points2One( QDialog, Ui_Dialog ):
         if inputLayer != "":
             changedLayer = getVectorLayerByName( inputLayer )
 
-    def update( self ):
+    def update(self):
         self.attrName.clear()
-        inputLayer = unicode( self.inShape.currentText() )
-        if inputLayer != "":
-            changedLayer = getVectorLayerByName( inputLayer )
-            changedField = changedLayer.dataProvider().fields()
-            for i in changedField:
-                self.attrName.addItem( unicode( changedField[i].name() ) )
+        name = unicode(self.inShape.currentText())
+        if name:
+            layer = getVectorLayerByName(name)
+            fields = layer.dataProvider().fields()
+            for field in fields:
+                self.attrName.addItem(unicode(field.name()))
 
     def manageGui( self ):
         myList = []

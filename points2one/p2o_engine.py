@@ -52,16 +52,22 @@ class Engine(object):
             if not QgsVectorFileWriter.deleteShapeFile(self.fname):
                 raise FileDeletionError
         provider = self.layer.dataProvider()
-        provider.select(self.layer.pendingAllAttributesList(),
-            QgsRectangle(), True, True)
         try:
-            # QGIS API version <= 1.8.0
-            writer = QgsVectorFileWriter(self.fname, self.encoding,
-                provider.fields(), self.wkb_type, self.layer.srs())
+            # XXX I have no idea why I wrote this!
+            # XXX Is it useful at all with old API?
+            provider.select(self.layer.pendingAllAttributesList(),
+                QgsRectangle(), True, True)
         except AttributeError:
-            # QGIS API version > 1.8.0
-            writer = QgsVectorFileWriter(self.fname, self.encoding,
-                provider.fields(), self.wkb_type, self.layer.crs())
+            # This fails with the 2.0 API but is not necessary.
+            pass
+        try:
+            # 2.0 API
+            crs = self.layer.crs()
+        except AttributeError:
+            # Old API
+            crs = self.layer.srs()
+        writer = QgsVectorFileWriter(self.fname, self.encoding,
+            provider.fields(), self.wkb_type, crs)
         for feature in self.iter_features():
             writer.addFeature(feature)
         del writer
@@ -106,7 +112,6 @@ class Engine(object):
         else:
             return [(None, points)]
 
-
     def iter_points(self):
         """Iterate over the features of the input layer.
     
@@ -116,11 +121,24 @@ class Engine(object):
         """
 
         provider = self.layer.dataProvider()
+        try:
+            # 2.0 API
+            features = provider.getFeatures()
+        except AttributeError:
+            # Old API. QgsVectorDataProvider itself iterates over features.
+            features = provider
+        
         feature = QgsFeature()
-        while(provider.nextFeature(feature)):
+        while(features.nextFeature(feature)):
             self.hook()
             geom = feature.geometry().asPoint()
-            yield(QgsPoint(geom.x(), geom.y()), feature.attributeMap())
+            try:
+                # 2.0 API
+                attributes = feature.attributes()
+            except AttributeError:
+                # Old API
+                attributes = feature.attributeMap()
+            yield(QgsPoint(geom.x(), geom.y()), attributes)
 
     def make_feature(self, points):
         """Return a feature with given vertices.
@@ -133,7 +151,7 @@ class Engine(object):
         point_list = []
         for point in points:
             point_list.append(point[0])
-        attr_map = point[1]
+        attributes = point[1]
         feature = QgsFeature()
         if self.wkb_type == QGis.WKBLineString:
             if len(point_list) < 2:
@@ -145,7 +163,12 @@ class Engine(object):
             feature.setGeometry(QgsGeometry.fromPolygon([point_list]))
         else:
             raise ValueError, 'Invalid geometry type: %s.' % self.wkb_type
-        feature.setAttributeMap(attr_map)
+        try:
+            # 2.0 API
+            feature.setAttributes(attributes)
+        except AttributeError:
+            # Old API
+            feature.setAttributeMap(attributes)
         return feature
                                                                        
     def log_warning(self, message):
