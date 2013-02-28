@@ -42,19 +42,85 @@ from p2o_encodings import setDefaultEncoding
 from p2o_engine import Engine
 
 
-class points2One( QDialog, Ui_Dialog ):
-    def __init__( self, iface ):
-        QDialog.__init__( self )
+class points2One(QDialog, Ui_Dialog):
+    def __init__(self, iface):
+        QDialog.__init__(self)
         self.iface = iface
-        self.setupUi( self )
-        QObject.connect( self.btnBrowse, SIGNAL( "clicked()" ), self.outFile )
-        QObject.connect( self.inShape, SIGNAL( "currentIndexChanged(QString)" ), self.checkLayer )
-        QObject.connect( self.inShape, SIGNAL( "currentIndexChanged(QString)" ), self.update )
-        self.setEncodings(getEncodings())
-        self.manageGui()   
+        self.setupUi(self)
+        QObject.connect(self.btnBrowse, SIGNAL('clicked()'), self.outFile)
+        QObject.connect(self.inShape, SIGNAL('currentIndexChanged(QString)'), self.update)
+        self.populate_encodings(getEncodings())
+        self.manageGui()
         self.show()
 
-    def setEncodings(self, names):
+    def layer_name(self):
+        """Return the selected layer name as unicode."""
+        return unicode(self.inShape.currentText())
+
+    def layer(self):
+        """Return the selected layer."""
+        name = self.layer_name()
+        if name:
+            return getVectorLayerByName(self.layer_name())
+
+    def output_geometry(self):
+        """Return the selected output geometry."""
+        if self.rdoPolyline.isChecked():
+            return QGis.WKBLineString
+        else:
+            return QGis.WKBPolygon
+
+    def group_attr_enabled(self):
+        """Return whether grouping by attribute is enabled."""
+        return self.rdoKeyName.isChecked()
+
+    def group_attr_name(self):
+        """Return the name of the grouping attribute."""
+        if self.group_attr_enabled():
+            return unicode(self.attrName.currentText())
+
+    def sort_enabled(self):
+        """Return whether sorting is enabled."""
+        return self.chbSort.isChecked()
+
+    def output_encoding(self):
+        """Return the selected encoding for the output shapefile."""
+        return unicode(self.cmbOutEncoding.currentText())
+
+    def check_input(self):
+        """Check whether the input is valid."""
+        layer = self.layer()
+        if layer is None:
+            msg = self.tr('Please specify an input layer')
+            QMessageBox.warning(self, 'Points2One', msg)
+            return False
+
+        provider = layer.dataProvider()
+        if (self.output_geometry() == QGis.WKBLineString and
+                provider.featureCount() < 2):
+            msg = self.tr('Polyline: Please select input layer with at least 2 points')
+            QMessageBox.warning(self, 'Points2One', msg)
+            return False
+
+        if (self.output_geometry() == QGis.WKBPolygon and
+                provider.featureCount() < 3):
+            self.tr('Polygon: Please select input layer with at least 3 points')
+            QMessageBox.warning(self, 'Points2One', msg)
+            return False
+
+        if self.group_attr_enabled() and self.group_attr_name() == '':
+            msg = self.tr('Please define specific input field')
+            QMessageBox.warning(self, 'Points2One', msg)
+            return False
+
+        if self.getOutFilePath() == '':
+            msg = self.tr('Please specify output shapefile')
+            QMessageBox.warning(self, 'Points2One', msg)
+            return False
+
+        return True
+
+    def populate_encodings(self, names):
         """Populate the combo box of available encodings."""
         self.cmbOutEncoding.clear()
         self.cmbOutEncoding.addItems(names)
@@ -63,100 +129,76 @@ class points2One( QDialog, Ui_Dialog ):
             index = 0  # Make sure some encoding is selected.
         self.cmbOutEncoding.setCurrentIndex(index)
 
-    def updateProgressBar(self):
+    def update_progress_bar(self):
+        """Update the progress bar."""
         self.progressBar.setValue(self.progressBar.value() + 1)
-
-    def checkLayer( self ):
-        inputLayer = unicode( self.inShape.currentText() )
-        if inputLayer != "":
-            changedLayer = getVectorLayerByName( inputLayer )
 
     def update(self):
         self.attrName.clear()
-        name = unicode(self.inShape.currentText())
-        if name:
-            layer = getVectorLayerByName(name)
+        layer = self.layer()
+        if layer is not None:
             fields = layer.dataProvider().fields()
             for field in fields:
                 self.attrName.addItem(unicode(field.name()))
 
-    def manageGui( self ):
+    def manageGui(self):
         myList = []
         self.inShape.clear()
-        myList = getLayerNames( [ QGis.Point ] )
-        self.inShape.addItems( myList )
-        return
+        myList = getLayerNames([QGis.Point])
+        self.inShape.addItems(myList)
 
-    def accept( self ):
-        if self.inShape.currentText() == "":
-            QMessageBox.warning( self, "Points2One", self.tr( "Please specify an input layer" ) )
+    def accept(self):
+        if not self.check_input():
             return
-        else:
-            inputLayer = unicode( self.inShape.currentText() )  
-            layer = getVectorLayerByName( inputLayer )
-            provider = layer.dataProvider()
-        if self.rdoPolyline.isChecked() and provider.featureCount() < 2:
-            QMessageBox.warning( self, "Points2One", self.tr( "Polyline: Please select input layer with at least 2 points" ) )
-        elif self.rdoPolygon.isChecked() and provider.featureCount() < 3:            
-            QMessageBox.warning( self, "Points2One", self.tr( "Polygon: Please select input layer with at least 3 points" ) )
-        elif self.attrName.isEnabled() and self.attrName.currentText() == "":
-            QMessageBox.warning( self, "Points2One", self.tr( "Please define specific input field" ) )
-        elif self.getOutFilePath() == "":
-            QMessageBox.warning( self, "Points2One", self.tr( "Please specify output shapefile" ) )
-        else:
-            if self.rdoPolyline.isChecked():
-                wkbType = QGis.WKBLineString
-            else:
-                wkbType = QGis.WKBPolygon
-            if self.rdoKeyName.isChecked():
-                attrName = unicode(self.attrName.currentText())
-            else:
-                attrName = None
-            self.progressBar.setRange(0, provider.featureCount())
-            setDefaultEncoding(self.getOutEncoding())
-            engine = Engine(layer, self.getOutFilePath(), self.getOutEncoding(), wkbType, attrName, self.updateProgressBar, self.getSort())
-            try:
-                engine.run()
-            except FileDeletionError:
-                QMessageBox.warning(self, 'Points2One', self.tr('Unable to delete existing shapefile.'))
-                return
 
-            # Show warning
-            log_msg = '\n'.join(engine.get_logger())
-            if log_msg:
-                warningBox = QMessageBox(self)
-                warningBox.setWindowTitle('Points2One')
-                message = self.tr('Output shapefile created')
-                warningBox.setText(message)
-                message = self.tr('There were some issues, maybe some features could not be created.')
-                warningBox.setInformativeText(message)
-                warningBox.setDetailedText(log_msg)
-                warningBox.setIcon(QMessageBox.Warning)
-                warningBox.exec_()
+        layer = self.layer()
+        self.progressBar.setRange(0, layer.dataProvider().featureCount())
+        setDefaultEncoding(self.output_encoding())
+        engine = Engine(
+            layer,
+            self.getOutFilePath(),
+            self.output_encoding(),
+            self.output_geometry(),
+            self.group_attr_name(),
+            self.update_progress_bar,
+            self.sort_enabled()
+        )
+        try:
+            engine.run()
+        except FileDeletionError:
+            message = self.tr('Unable to delete existing shapefile.')
+            QMessageBox.warning(self, 'Points2One', message)
+            return
 
-            message = unicode(self.tr('Created output shapefile:'))
-            message = '\n'.join([message, unicode(self.getOutFilePath())])
-            message = '\n'.join([message,
-                unicode(self.tr('Would you like to add the new layer to the TOC?'))])
-            addToTOC = QMessageBox.question(self, "Points2One", message,
-                QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton)
-            if addToTOC == QMessageBox.Yes:
-                addShapeToCanvas(unicode(self.getOutFilePath()))
-            self.progressBar.setValue(0) 
-        
+        # Show warning
+        log_msg = '\n'.join(engine.get_logger())
+        if log_msg:
+            warningBox = QMessageBox(self)
+            warningBox.setWindowTitle('Points2One')
+            message = self.tr('Output shapefile created')
+            warningBox.setText(message)
+            message = self.tr('There were some issues, maybe some features could not be created.')
+            warningBox.setInformativeText(message)
+            warningBox.setDetailedText(log_msg)
+            warningBox.setIcon(QMessageBox.Warning)
+            warningBox.exec_()
+
+        message = unicode(self.tr('Created output shapefile:'))
+        message = '\n'.join([message, unicode(self.getOutFilePath())])
+        message = '\n'.join([message,
+            unicode(self.tr('Would you like to add the new layer to the TOC?'))])
+        addToTOC = QMessageBox.question(self, "Points2One", message,
+            QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton)
+        if addToTOC == QMessageBox.Yes:
+            addShapeToCanvas(unicode(self.getOutFilePath()))
+        self.progressBar.setValue(0) 
+
     def outFile(self):
         """Open a file save dialog and set the output file path."""
         outFilePath = saveDialog(self)
         if not outFilePath:
             return
         self.setOutFilePath(QString(outFilePath))
-
-    def getOutEncoding(self):
-        """Return the selected encoding for the output shapefile."""
-        return self.cmbOutEncoding.currentText()
-
-    def getSort(self):
-        return self.chbSort.isChecked()
 
     def getOutFilePath(self):
         """Return the output file path."""
@@ -166,7 +208,7 @@ class points2One( QDialog, Ui_Dialog ):
         """Set the output file path."""
         self.outShape.setText(outFilePath)
 
-                                                                           #~ 
+
 # Return QgsVectorLayer from a layer name ( as string )
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
 def getVectorLayerByName( myName ):
@@ -178,20 +220,22 @@ def getVectorLayerByName( myName ):
             else:
                 return None
 
+
 # Return list of names of all layers in QgsMapLayerRegistry
 # adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
-def getLayerNames( vTypes ):
+def getLayerNames(vTypes):
     layermap = QgsMapLayerRegistry.instance().mapLayers()
     layerlist = []
-    if vTypes == "all":
+    if vTypes == 'all':
         for name, layer in layermap.iteritems():
-            layerlist.append( unicode( layer.name() ) )
+            layerlist.append(unicode(layer.name()))
     else:
         for name, layer in layermap.iteritems():
             if layer.type() == QgsMapLayer.VectorLayer:
                 if layer.geometryType() in vTypes:
-                    layerlist.append( unicode( layer.name() ) )
+                    layerlist.append(unicode(layer.name()))
     return layerlist
+
 
 def saveDialog(parent):
     """Shows a save file dialog and return the selected file path."""
@@ -209,22 +253,21 @@ def saveDialog(parent):
         settings.setValue(key, outDir)
     return outFilePath
 
-# Convinience function to add a vector layer to canvas based on input shapefile path ( as string )
-# adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
+
+# Convenience function to add a vector layer to canvas based on input
+# shapefile path (as string).
+# Adopted from 'fTools Plugin', Copyright (C) 2009  Carson Farmer
 def addShapeToCanvas(shapeFilePath):
     layerName = basename(shapeFilePath)
     root, ext = splitext(layerName)
     if ext == '.shp':
         layerName = root
     vlayer_new = QgsVectorLayer(shapeFilePath, layerName, "ogr")
-    if vlayer_new.isValid():
-        try:
-            QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
-        except AttributeError:
-            QgsMapLayerRegistry.instance().addMapLayers([vlayer_new])
-        return True
-    else:   
-        return False
+    try:
+        QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
+    except AttributeError:
+        QgsMapLayerRegistry.instance().addMapLayers([vlayer_new])
+    return True
 
 
 class FileDeletionError(Exception):
