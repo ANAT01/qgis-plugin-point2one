@@ -160,7 +160,14 @@ class Engine(object):
         elif self.wkb_type == QGis.WKBPolygon:
             if len(point_list) < 3:
                 raise ValueError, 'Can\'t make a polygon out of %s points' % len(point_list)
-            feature.setGeometry(QgsGeometry.fromPolygon([point_list]))
+            geom = QgsGeometry.fromPolygon([point_list])
+            if geom is None:
+                # This should not happen but lp:1133082 suggest it can
+                # actually happen so I do this for debugging.
+                fname = 'lp_1133082_debug.txt'
+                with open(fname, 'w') as f:
+                    f.write(repr(point_list))
+            feature.setGeometry(geom)
         else:
             raise ValueError, 'Invalid geometry type: %s.' % self.wkb_type
         try:
