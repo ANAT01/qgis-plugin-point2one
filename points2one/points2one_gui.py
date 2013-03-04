@@ -197,7 +197,7 @@ class points2One(QDialog, Ui_Dialog):
             QMessageBox.Yes, QMessageBox.No, QMessageBox.NoButton)
         if addToTOC == QMessageBox.Yes:
             addShapeToCanvas(unicode(self.getOutFilePath()))
-        self.progressBar.setValue(0) 
+        self.progressBar.setValue(0)
 
     def outFile(self):
         """Open a file save dialog and set the output file path."""
