@@ -1,10 +1,8 @@
 #-----------------------------------------------------------
 # 
 # Points2One
-# Copyright (C) 2010 Pavol Kapusta
-# Copyright (C) 2011 Pavol Kapusta & Goyo Diaz
-# pavol.kapusta@gmail.com
-# goyodiaz@gmail.com
+# Copyright (C) 2010-2011 Pavol Kapusta <pavol.kapusta@gmail.com>
+# Copyright (C) 2011-2012 Goyo <goyodiaz@gmail.com>
 # 
 #-----------------------------------------------------------
 # 
@@ -36,15 +34,14 @@ import resources
 import points2one_gui
 
 
-class points2one:
-
+class points2one(object):
     def __init__(self, iface):
         self.iface = iface
         self.load_translation()
 
     def load_translation(self):
         ## Initialise the translation environment.
-        locale = QSettings().value("locale/userLocale").toString()
+        locale = QSettings().value('locale/userLocale').toString()
         locale_path = os.path.join(os.path.dirname(__file__), 'i18n',
             ''.join(['points2one_', unicode(locale), '.qm']))
         if QFileInfo(locale_path).exists():
@@ -53,20 +50,31 @@ class points2one:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
-
     def initGui(self):
         # create action 
-        self.action = QAction(QIcon(':/plugins/points2one/points2one.png'), 'Points2One', self.iface.mainWindow())
-        self.action.setWhatsThis('Tool for creating polygon or polyline from ordered points. Does not deal with rings and parts')
+        self.action = QAction(
+            QIcon(':/plugins/points2one/points2one.png'),
+            'Points2One',
+            self.iface.mainWindow()
+        )
+        self.action.setWhatsThis('Create polygons and lines from vertices.')
         QObject.connect(self.action, SIGNAL('triggered()'), self.run)
         # add toolbar button and menu item
-        self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToMenu('&Points2One', self.action)
+        try:
+            self.iface.addVectorToolBarIcon(self.action)
+            self.iface.addPluginToVectorMenu('&Points2One', self.action)
+        except AttributeError:  # vector menu and toolbar not available
+            self.iface.addToolBarIcon(self.action)
+            self.iface.addPluginToMenu('&Points2One', self.action)
 
     def unload(self):
         # remove the plugin menu item and icon
-        self.iface.removePluginMenu('&Points2One',self.action)
-        self.iface.removeToolBarIcon(self.action)
+        try:
+            self.iface.removePluginVectorMenu('&Points2One',self.action)
+            self.iface.removeVectorToolBarIcon(self.action)
+        except AttributeError:  # vector menu and toolbar not available
+            self.iface.removePluginMenu('&Points2One',self.action)
+            self.iface.removeToolBarIcon(self.action)
 
     def run(self):
         dialog = points2one_gui.points2One(self.iface)

@@ -1,8 +1,8 @@
 #-----------------------------------------------------------
 # 
 # Points2One
-# Copyright (C) 2010 Pavol Kapusta
-# pavol.kapusta@gmail.com
+# Copyright (C) 2010 Pavol Kapusta <pavol.kapusta@gmail.com>
+# Copyright (C) 2013 Goyo <goyodiaz@gmail.com>
 #
 #-----------------------------------------------------------
 # 
@@ -25,25 +25,29 @@
 #---------------------------------------------------------------------
 
 def name():
-	return "Points2One"
+	return 'Points2One'
 
 def description():
-	return "Tool for creating polygon or polyline from ordered points. Does not deal with rings and parts"
+	return 'Create lines and polygons from vertices.'
 
 def version():
-	return "0.2.11dev"
+	return '0.2.12dev'
   
 def qgisMinimumVersion():
-	return "1.0"
+	return '1.0'
 	
 def authorName():
-	return "Pavol Kapusta & Goyo"
+	return 'Pavol Kapusta & Goyo'
 
 def author():
-	return "Pavol Kapusta & Goyo"
+	return 'Pavol Kapusta & Goyo'
 
 def email():
-	return "goyodiaz@gmail.com"
+	return 'goyodiaz@gmail.com'
+
+def category():
+  return 'Vector'
+
 
 def classFactory(iface):
 	from points2one_plugin import points2one
