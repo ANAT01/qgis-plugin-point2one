@@ -139,7 +139,13 @@ class points2One(QDialog, Ui_Dialog):
         if layer is not None:
             fields = layer.dataProvider().fields()
             for field in fields:
-                self.attrName.addItem(unicode(field.name()))
+                try:
+                    # 2.0 API
+                    name = field.name()
+                except AttributeError:
+                    # old API
+                    name = fields[field].name()
+                self.attrName.addItem(name)
 
     def manageGui(self):
         myList = []
