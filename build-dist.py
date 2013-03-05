@@ -35,6 +35,7 @@ dirs = {
         'points2one'),
     'points2one': ([
         'frmPoints2One.ui',
+        'metadata.txt',
         '__init__.py',
         'p2o_encodings.py',
         'p2o_engine.py',
