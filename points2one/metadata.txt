@@ -13,7 +13,7 @@ name=Points2One
 qgisMinimumVersion=1.0
 description=Create lines and polygons from vertices.
 version=0.2.12
-author=Pavol Kapusta & Goyo
+author=Pavol Kapusta
 email=goyodiaz@gmail.com
 
 # end of mandatory metadata

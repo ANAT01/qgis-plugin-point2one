@@ -40,7 +40,7 @@ def qgisMinimumVersion():
 	return '1.0'
 	
 def author():
-	return 'Pavol Kapusta & Goyo'
+	return 'Pavol Kapusta'
 
 def email():
 	return 'goyodiaz@gmail.com'
