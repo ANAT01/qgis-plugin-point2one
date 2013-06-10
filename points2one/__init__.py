@@ -35,13 +35,13 @@ def version():
 
 def icon():
 	return 'points2one.png'
-  
+
 def qgisMinimumVersion():
 	return '1.9'
 
 def qgisMaximumVersion():
 	return '2.9'
-	
+
 def author():
 	return 'Pavol Kapusta'
 
