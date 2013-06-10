@@ -2,7 +2,7 @@
 # 
 # Points2One
 # Copyright (C) 2010 Pavol Kapusta <pavol.kapusta@gmail.com>
-# Copyright (C) 2013 Goyo <goyodiaz@gmail.com>
+# Copyright (C) 2010, 2013 Goyo <goyodiaz@gmail.com>
 #
 #-----------------------------------------------------------
 # 
@@ -31,13 +31,16 @@ def description():
 	return 'Create lines and polygons from vertices.'
 
 def version():
-	return '0.2.13dev'
+	return '0.2.13'
 
 def icon():
 	return 'points2one.png'
   
 def qgisMinimumVersion():
-	return '1.0'
+	return '1.9'
+
+def qgisMaximumVersion():
+	return '2.9'
 	
 def author():
 	return 'Pavol Kapusta'

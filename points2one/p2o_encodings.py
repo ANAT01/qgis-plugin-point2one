@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2010 Goyo <goyodiaz@gmail.com>
+# Copyright 2010, 2013 Goyo <goyodiaz@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,21 +20,20 @@
 """Encoding related stuff."""
 
 
-from PyQt4.QtCore import QString
-from PyQt4.QtCore import QTextCodec
 from PyQt4.QtCore import QSettings
+from PyQt4.QtCore import QTextCodec
 
 
 def getEncodings():
     """Return a list of available encodings."""
-    names = [QString(QTextCodec.codecForMib(mib).name()) 
+    names = [unicode(QTextCodec.codecForMib(mib).name())
              for mib in QTextCodec.availableMibs()]
     return names
 
 def getDefaultEncoding(default='System'):
-    """Return the default encoding as a QString."""
+    """Return the default encoding."""
     settings = QSettings()
-    encoding = settings.value('/UI/encoding', default).toString()
+    encoding = settings.value('/UI/encoding', default)
     return encoding
 
 def setDefaultEncoding(encoding):

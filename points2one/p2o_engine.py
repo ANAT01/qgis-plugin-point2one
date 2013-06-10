@@ -2,7 +2,7 @@
 #-----------------------------------------------------------
 #
 # Points2One
-# Copyright (C) 2010 Pavol Kapusta & Goyo Diaz
+# Copyright (C) 2010 Pavol Kapusta 2010, 2013 Goyo Diaz
 # pavol.kapusta@gmail.com
 # goyodiaz@gmail.com
 #-----------------------------------------------------------
@@ -85,7 +85,7 @@ class Engine(object):
             try:
                 feature = self.make_feature(points)
             except ValueError, e:
-                message = 'Key value %s: %s' % (key.toString(), e.message)
+                message = 'Key value %s: %s' % (key, e.message)
                 self.log_warning(message)
             else:
                 yield feature
@@ -107,7 +107,7 @@ class Engine(object):
                 raise UnknownAttributeError
             if self.sort:
                 points = sorted(points,
-                                key=lambda p: p[1][attr_idx].toString())
+                                key=lambda p: p[1][attr_idx])
             return groupby(points, lambda p: p[1][attr_idx])
         else:
             return [(None, points)]

@@ -2,9 +2,8 @@
 #-----------------------------------------------------------
 # 
 # Points2One
-# Copyright (C) 2010 Pavol Kapusta & Goyo Diaz
-# pavol.kapusta@gmail.com
-# goyodiaz@gmail.com
+# Copyright (C) 2010 Pavol Kapusta <pavol.kapusta@gmail.com>
+# Copyright (C) 2010, 2013 Goyo <goyodiaz@gmail.com>
 #-----------------------------------------------------------
 # 
 # licensed under the terms of GNU GPL 2
@@ -204,7 +203,7 @@ class points2One(QDialog, Ui_Dialog):
         outFilePath = saveDialog(self)
         if not outFilePath:
             return
-        self.setOutFilePath(QString(outFilePath))
+        self.setOutFilePath(outFilePath)
 
     def getOutFilePath(self):
         """Return the output file path."""
@@ -247,7 +246,7 @@ def saveDialog(parent):
     """Shows a save file dialog and return the selected file path."""
     settings = QSettings()
     key = '/UI/lastShapefileDir'
-    outDir = settings.value(key).toString()
+    outDir = settings.value(key)
     filter = 'Shapefiles (*.shp)'
     outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outDir, filter)
     outFilePath = unicode(outFilePath)

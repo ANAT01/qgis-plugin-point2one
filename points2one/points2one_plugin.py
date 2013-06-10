@@ -2,7 +2,7 @@
 # 
 # Points2One
 # Copyright (C) 2010-2011 Pavol Kapusta <pavol.kapusta@gmail.com>
-# Copyright (C) 2011-2012 Goyo <goyodiaz@gmail.com>
+# Copyright (C) 2011, 2013 Goyo <goyodiaz@gmail.com>
 # 
 #-----------------------------------------------------------
 # 
@@ -41,7 +41,7 @@ class points2one(object):
 
     def load_translation(self):
         ## Initialise the translation environment.
-        locale = QSettings().value('locale/userLocale').toString()
+        locale = QSettings().value('locale/userLocale')
         locale_path = os.path.join(os.path.dirname(__file__), 'i18n',
             ''.join(['points2one_', unicode(locale), '.qm']))
         if QFileInfo(locale_path).exists():
