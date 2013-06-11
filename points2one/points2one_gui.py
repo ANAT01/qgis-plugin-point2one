@@ -138,12 +138,7 @@ class points2One(QDialog, Ui_Dialog):
         if layer is not None:
             fields = layer.dataProvider().fields()
             for field in fields:
-                try:
-                    # 2.0 API
-                    name = field.name()
-                except AttributeError:
-                    # old API
-                    name = fields[field].name()
+                name = field.name()
                 self.attrName.addItem(name)
 
     def manageGui(self):
@@ -268,11 +263,8 @@ def addShapeToCanvas(shapeFilePath):
     if ext == '.shp':
         layerName = root
     vlayer_new = QgsVectorLayer(shapeFilePath, layerName, "ogr")
-    try:
-        QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
-    except AttributeError:
-        QgsMapLayerRegistry.instance().addMapLayers([vlayer_new])
-    return True
+    ret = QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
+    return ret
 
 
 class FileDeletionError(Exception):

@@ -2,9 +2,9 @@
 #-----------------------------------------------------------
 #
 # Points2One
-# Copyright (C) 2010 Pavol Kapusta 2010, 2013 Goyo Diaz
-# pavol.kapusta@gmail.com
-# goyodiaz@gmail.com
+# Copyright (C) 2010 Pavol Kapusta <pavol.kapusta@gmail.com>
+# Copyright (C) 2010, 2013 Goyo <goyodiaz@gmail.com>
+#
 #-----------------------------------------------------------
 #
 # licensed under the terms of GNU GPL 2
@@ -52,22 +52,8 @@ class Engine(object):
             if not QgsVectorFileWriter.deleteShapeFile(self.fname):
                 raise FileDeletionError
         provider = self.layer.dataProvider()
-        try:
-            # XXX I have no idea why I wrote this!
-            # XXX Is it useful at all with old API?
-            provider.select(self.layer.pendingAllAttributesList(),
-                QgsRectangle(), True, True)
-        except AttributeError:
-            # This fails with the 2.0 API but is not necessary.
-            pass
-        try:
-            # 2.0 API
-            crs = self.layer.crs()
-        except AttributeError:
-            # Old API
-            crs = self.layer.srs()
         writer = QgsVectorFileWriter(self.fname, self.encoding,
-            provider.fields(), self.wkb_type, crs)
+            provider.fields(), self.wkb_type, self.layer.crs())
         for feature in self.iter_features():
             writer.addFeature(feature)
         del writer
@@ -121,23 +107,12 @@ class Engine(object):
         """
 
         provider = self.layer.dataProvider()
-        try:
-            # 2.0 API
-            features = provider.getFeatures()
-        except AttributeError:
-            # Old API. QgsVectorDataProvider itself iterates over features.
-            features = provider
-        
+        features = provider.getFeatures()
         feature = QgsFeature()
         while(features.nextFeature(feature)):
             self.hook()
             geom = feature.geometry().asPoint()
-            try:
-                # 2.0 API
-                attributes = feature.attributes()
-            except AttributeError:
-                # Old API
-                attributes = feature.attributeMap()
+            attributes = feature.attributes()
             yield(QgsPoint(geom.x(), geom.y()), attributes)
 
     def make_feature(self, points):
@@ -170,12 +145,7 @@ class Engine(object):
             feature.setGeometry(geom)
         else:
             raise ValueError, 'Invalid geometry type: %s.' % self.wkb_type
-        try:
-            # 2.0 API
-            feature.setAttributes(attributes)
-        except AttributeError:
-            # Old API
-            feature.setAttributeMap(attributes)
+        feature.setAttributes(attributes)
         return feature
                                                                        
     def log_warning(self, message):

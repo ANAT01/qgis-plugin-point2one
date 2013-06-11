@@ -60,21 +60,13 @@ class points2one(object):
         self.action.setWhatsThis('Create polygons and lines from vertices.')
         QObject.connect(self.action, SIGNAL('triggered()'), self.run)
         # add toolbar button and menu item
-        try:
-            self.iface.addVectorToolBarIcon(self.action)
-            self.iface.addPluginToVectorMenu('&Points2One', self.action)
-        except AttributeError:  # vector menu and toolbar not available
-            self.iface.addToolBarIcon(self.action)
-            self.iface.addPluginToMenu('&Points2One', self.action)
+        self.iface.addVectorToolBarIcon(self.action)
+        self.iface.addPluginToVectorMenu('&Points2One', self.action)
 
     def unload(self):
         # remove the plugin menu item and icon
-        try:
-            self.iface.removePluginVectorMenu('&Points2One',self.action)
-            self.iface.removeVectorToolBarIcon(self.action)
-        except AttributeError:  # vector menu and toolbar not available
-            self.iface.removePluginMenu('&Points2One',self.action)
-            self.iface.removeToolBarIcon(self.action)
+        self.iface.removePluginVectorMenu('&Points2One',self.action)
+        self.iface.removeVectorToolBarIcon(self.action)
 
     def run(self):
         dialog = points2one_gui.points2One(self.iface)
