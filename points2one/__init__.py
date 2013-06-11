@@ -31,7 +31,7 @@ def description():
 	return 'Create lines and polygons from vertices.'
 
 def version():
-	return '0.2.14dev'
+	return '0.2.14'
 
 def icon():
 	return 'points2one.png'
