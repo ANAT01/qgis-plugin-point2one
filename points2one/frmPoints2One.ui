@@ -76,6 +76,22 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="rdoPolylineClosed">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Closed</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -274,6 +290,22 @@
     <hint type="destinationlabel">
      <x>160</x>
      <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdoPolyline</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rdoPolylineClosed</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>350</x>
+     <y>110</y>
     </hint>
    </hints>
   </connection>

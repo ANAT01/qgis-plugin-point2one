@@ -69,6 +69,13 @@ class points2One(QDialog, Ui_Dialog):
         else:
             return QGis.WKBPolygon
 
+    def polyline_closed(self):
+        """Return the selected output geometry."""
+        if self.rdoPolylineClosed.isChecked():
+            return True
+        else:
+            return False
+
     def group_attr_enabled(self):
         """Return whether grouping by attribute is enabled."""
         return self.rdoKeyName.isChecked()
@@ -159,6 +166,7 @@ class points2One(QDialog, Ui_Dialog):
             self.getOutFilePath(),
             self.output_encoding(),
             self.output_geometry(),
+            self.polyline_closed(),
             self.group_attr_name(),
             self.update_progress_bar,
             self.sort_enabled()

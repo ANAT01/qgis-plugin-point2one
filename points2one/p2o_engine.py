@@ -34,12 +34,13 @@ from qgis.core import *
 class Engine(object):
     """Data processing for Point2One."""
 
-    def __init__(self, layer, fname, encoding, wkb_type, attr_name=None,
+    def __init__(self, layer, fname, encoding, wkb_type, polyline_closed, attr_name=None,
                  hook=None, sort=False):
         self.layer = layer
         self.fname = fname
         self.encoding = encoding
         self.wkb_type = wkb_type
+        self.polyline_closed = polyline_closed
         self.attr_name = attr_name
         self.hook = hook
         self.sort = sort
@@ -131,6 +132,9 @@ class Engine(object):
         if self.wkb_type == QGis.WKBLineString:
             if len(point_list) < 2:
                 raise ValueError, 'Can\'t make a polyline out of %s points' % len(point_list)
+            if len(point_list) > 2 and self.polyline_closed == True:
+                if point_list[0] != point_list[-1]:
+                    point_list.append(point_list[0]);
             feature.setGeometry(QgsGeometry.fromPolyline(point_list))
         elif self.wkb_type == QGis.WKBPolygon:
             if len(point_list) < 3:
